@@ -159,6 +159,17 @@ jobs:
           echo "# dirty-marker" >> Makefile
           git diff-index --quiet HEAD || echo "tree is dirty, setlocalversion will append +"
 
+      # ── 2.6 应用 ReSukiSU manual hook 插桩 ──
+      # AbzRaider LOS 21 源码已自带 execveat/faccessat/stat 三处插桩，但缺
+      # ksu_handle_newfstat_ret / ksu_handle_fstat64_ret (fs/stat.c) 和
+      # ksu_handle_sys_reboot (kernel/reboot.c)，BakaSU 的 manual_hook_check.mk
+      # 会在编译 drivers/kernelsu 时检查并中止。补丁写法取自 seriaTvT/kernel_mt6893
+      # chopin_kvm（原流水线构建成功的插桩）。
+      - name: 应用 ReSukiSU manual hook 插桩
+        run: |
+          cd "${{ env.KERNEL_NAME }}"
+          git apply --verbose "${{ github.workspace }}/patches/resukisu-manual-hook-chopin-los21.patch"
+
       # ── 3. 获取工具链 (AOSP Clang 12) ──
       - name: 获取工具链
         run: |
