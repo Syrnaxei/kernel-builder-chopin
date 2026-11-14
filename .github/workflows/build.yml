@@ -292,7 +292,7 @@ jobs:
             rm -rf "./drivers/kernelsu"
           fi
 
-          curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash -s main
+          curl -LSs "https://raw.githubusercontent.com/ReSukiSU/ReSukiSU/main/kernel/setup.sh" | bash -s v4.2.0-rc3
 
           # defconfig 末尾可能没有换行符（chopin_defconfig 即如此），直接追加会把
           # 首行拼到最后一行上（CONFIG_NETWORK_SECMARK=yCONFIG_KSU=y），使该行成为非法符号。
