@@ -141,6 +141,10 @@ jobs:
           sudo apt-get install -y build-essential bc \
             libssl-dev libfl-dev curl git ccache python2 python2-dev zip unzip
 
+      # ── 1.5 检出流水线仓库（patches/ 等；原流水线不 checkout 自身）──
+      - name: 检出流水线仓库
+        uses: actions/checkout@v4
+
       # ── 2. 克隆内核源码 ──
       - name: 克隆内核源码
         run: |
