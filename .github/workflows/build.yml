@@ -174,6 +174,17 @@ jobs:
           cd "${{ env.KERNEL_NAME }}"
           git apply --verbose "${{ github.workspace }}/patches/resukisu-manual-hook-chopin-los21.patch"
 
+      # ── 2.7 dma_buf 释放路径补 list_del ──
+      # 该源码树 dma_buf_release() 只 kfree 不从 db_list.head 摘链，释放后的节点悬空，
+      # 内存复用后链表损坏（开机 15s 起任意 dma_buf_export 即触发 list_add corruption），
+      # 导致 tee_shm_alloc 全灭 → 所有 mitee daemon（mtd/mlipayd/fidoca）注册失败、
+      # 指纹 HAL daemon 连接失败 → 指纹/支付/FIDO 全部不可用。LOS 21 原版预编译内核同样存在。
+      - name: 应用 dma_buf db_list 修复
+        run: |
+          cd "${{ env.KERNEL_NAME }}"
+          git apply --verbose "${{ github.workspace }}/patches/dma-buf-db-list-fix.patch"
+
+
       # ── 3. 获取工具链 (AOSP Clang 12) ──
       - name: 获取工具链
         run: |
