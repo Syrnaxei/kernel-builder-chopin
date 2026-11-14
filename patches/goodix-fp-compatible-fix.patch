@@ -1,0 +1,10 @@
+--- a/drivers/input/fingerprint/goodix_cap/gf_spi_tee.c
++++ b/drivers/input/fingerprint/goodix_cap/gf_spi_tee.c
+@@ -127,6 +127,7 @@
+
+ #ifdef CONFIG_OF
+ static const struct of_device_id gf_of_match[] = {
++	{.compatible = "mediatek,goodix-fp",},
+ 	{.compatible = "goodix,goodix-fp",},
+ 	{},
+ };
