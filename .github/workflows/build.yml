@@ -4,11 +4,13 @@ env:
   TZ: Asia/Shanghai
 
   # ── 内核源码 ──
-  KERNEL_NAME: Chopin-A16-KVM-Proton-release
-  KERNEL_REPO: https://github.com/seriaTvT/kernel_mt6893
-  KERNEL_BRANCH: chopin_kvm
+  # LOS 21 内核（AbzRaider lineage-21）：vermagic 需复现 4.14.336-AbzRaider-VIC-OSS+，
+  # 末尾 + 由"弄脏源码树"步骤触发 setlocalversion 产生，kernel_suffix 必须留空
+  KERNEL_NAME: Chopin-A14-ReSukiSU-release
+  KERNEL_REPO: https://github.com/AbzRaider/android_kernel_xiaomi_mt6893
+  KERNEL_BRANCH: lineage-21
   KERNEL_DEVICE: chopin
-  DEFCONFIG_NAME: chopin_defconfig
+  DEFCONFIG_NAME: chopin_user_defconfig
 
   # ── 工具链 ──
   # 实际工具链（AOSP Clang 12.0.5 r416183b，纯 LLVM 构建）
@@ -146,6 +148,16 @@ jobs:
             --branch ${{ env.KERNEL_BRANCH }} \
             ${{ env.KERNEL_REPO }} \
             ${{ env.KERNEL_NAME }}
+
+      # ── 2.5 弄脏源码树（复现 vermagic 末尾的 +）──
+      # vendor 模块 vermagic 为 4.14.336-AbzRaider-VIC-OSS+（含 +，源自 LOS 21 预编译时的脏树），
+      # 内核加载模块时逐字符比对；干净克隆不产生 +，故克隆后故意弄脏。
+      # 克隆目录名 = KERNEL_NAME（见"克隆内核源码"步骤）。
+      - name: 弄脏源码树以复现 vermagic 末尾的 +
+        run: |
+          cd "${{ env.KERNEL_NAME }}"
+          echo "# dirty-marker" >> Makefile
+          git diff-index --quiet HEAD || echo "tree is dirty, setlocalversion will append +"
 
       # ── 3. 获取工具链 (AOSP Clang 12) ──
       - name: 获取工具链
@@ -288,8 +300,10 @@ jobs:
           cat arch/${{ env.ARCH }}/configs/${{ env.DEFCONFIG_NAME }}
 
       # ── 6.5 集成 Droidspaces 支持 ──
+      # LOS 21 构建禁用：Droidspaces 是给 LOS 23.2 KVM 内核加容器/命名空间支持的补丁集，
+      # 与 KSU 无关，且可能改变模块符号 CRC 导致 vendor 模块校验失败（CONFIG_MODVERSIONS=y）
       - name: 集成 Droidspaces 支持
-        if: inputs.droidspaces_enabled
+        if: false
         working-directory: ${{ env.KERNEL_NAME }}
         run: |
           set -euo pipefail
