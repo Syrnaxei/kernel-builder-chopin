@@ -184,6 +184,15 @@ jobs:
           cd "${{ env.KERNEL_NAME }}"
           git apply --verbose "${{ github.workspace }}/patches/dma-buf-db-list-fix.patch"
 
+      # ── 2.8 goodix_fp SPI 驱动 compatible 修复 ──
+      # chopin DT 节点 compatible = "mediatek,goodix-fp"，而驱动 of_match 只有 "goodix,goodix-fp"，
+      # SPI 永不绑定 → /dev/goodix_fp 不存在 → 指纹 HAL 无法初始化。
+      - name: 应用 goodix_fp compatible 修复
+        run: |
+          cd "${{ env.KERNEL_NAME }}"
+          git apply --verbose "${{ github.workspace }}/patches/goodix-fp-compatible-fix.patch"
+
+
 
       # ── 3. 获取工具链 (AOSP Clang 12) ──
       - name: 获取工具链
